@@ -1,5 +1,6 @@
 ﻿namespace SvgZero
 
+open SvgZero.Colour
 
 module GraphicProps =
 
@@ -93,3 +94,76 @@ module GraphicProps =
             match x with
             | Default -> "default"
             | Preserve -> "preserve"
+
+    /// Stroke attributes for drawing paths.
+    type StrokeAttr = 
+      { LineWidth : double
+        MiterLimit : double
+        Cap : StrokeLinecap
+        Join : StrokeLinejoin
+        DashPattern : StrokeDasharray
+      }
+
+
+    /// TODO - following Wumpus might not be best for an SVG-only library (Wumpus may itself be flawed)
+    /// Closing a path now seems more related to its shape (points) than its style (stroke attributes /
+    /// colour).
+
+    type PathProps = 
+      { PathColour : Colour
+        LineAttrs : StrokeAttr
+      }
+
+//    type PathProps =
+//        | ClosedFill of { PathColour : Colour }
+//        | ClosedStroke of { PathAttrs : StrokeAttrs; PathColour : Colour }
+//        | OpenStroke of { PathAttrs : StrokeAttrs; PathColour : Colour }
+//        | ClosedFilled of { PathAttrs : StrokeAttrs; PathColour : Colour, FillColour : Colour }
+        
+        
+        
+    type FontFace = { FontName : string }
+        
+    
+    type FontAttr =  
+      { FontSize : int 
+        Face : FontFace
+        Style : FontStyle
+        Variant : FontVariant
+        Weight : FontWeight
+      }
+        
+    type LabelProps = 
+      { LabelColour : Colour
+        LabelFont : FontAttr
+      }
+      
+    
+    /// Note - SVG has builtins for:
+    /// Rect Circle Ellipse Line Polyline Polygon
+    /// Having (Rect, Circle, Ellipse) in both input and output is a good optimization.
+    
+    /// We "might as well" model Polygon and Polyline as we want a graphic model close
+    /// to SVG. If we model Polyline we can recover Line as one segment Polylines
+    
+    
+    type RectProps = 
+      { RoundingX : double
+        RoundingY : double
+        FillColour : Option<Colour>
+        StrokeColour : Option<Colour>
+        StrokeWidth : double
+      }
+    
+    
+    /// Circle, Ellipse, Polygon
+    type ShapeProps =
+      { FillColour : Option<Colour>
+        StrokeColour : Option<Colour>
+        StrokeWidth : double
+      }
+    
+    type LineProps =
+      { StrokeColour : Colour
+        StrokeWidth : double
+      }

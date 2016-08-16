@@ -7,13 +7,22 @@
 #r "System.Xml"
 #r "System.Xml.Linq"
 
+#load "Colour.fs"
+#load "Geometry.fs"
+#load "GraphicProps.fs"
 #load "SvgDoc.fs"
 
-open SvgZero
+
 open System.Xml
 open System.Xml.Linq
 
-let test01 = SvgDoc.elemSvg [ SvgDoc.elemCircle <| seq [ SvgDoc.attrCx 30.0; SvgDoc.attrCy 80.0; SvgDoc.attrR 20.0; SvgDoc.attrFill "blue" ] ]
+open SvgZero
+open SvgZero.Colour
+open SvgZero.GraphicProps
+open SvgZero.SvgDoc
+
+let test01 = elemSvg [ elemCircle <| seq [ attrCx 30.0; attrCy 80.0; attrR 20.0; attrFill (Named "blue") ] ]
+let test02 = RGBAi(0,255,0,0).SvgValue;;
 
 let doc = new XmlDocument ()
 let nssvg : XNamespace = XNamespace.Get("http://www.w3.org/2000/svg")
