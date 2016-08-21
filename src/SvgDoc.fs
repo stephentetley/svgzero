@@ -152,7 +152,7 @@ module SvgDoc =
     
     let valTranslate (v : Vector2) : string = sprintf "translate(%f,%f)" v.GetX v.GetY
     
-    let valRotate (r : Radian) : string = sprintf "rotate(%f)" (rad2Deg r)
+    let valRotate (r : Radians) : string = sprintf "rotate(%f)" (rad2Deg r)
     
     let valScale (x : double) (y : double) = sprintf "scale(%f,%f)" x y
     

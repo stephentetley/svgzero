@@ -97,11 +97,14 @@ module Geometry =
         | M3x3(a,b,c,  d,e,f,  g,h,i) -> a*e*i - a*f*h - b*d*i + b*f*g + c*d*h - c*e*g
     
     /// Naming - Radian or Radians?
-    type Radian = Rad of double
+    type Radians = Rad of double
     
+    /// At some point the Rad constructor should be opaque...
+    let radians (d : double) = Rad(d)
+
     let deg2Rad (d : double) = Rad(d * Math.PI / 180.0)
     
-    let rad2Deg : Radian -> double = function | Rad(r) -> r * (180.0 / Math.PI)
+    let rad2Deg : Radians -> double = function | Rad(r) -> r * (180.0 / Math.PI)
             
             
     /// lineDirection :: (Floating u, Real u) => Point2 u -> Point2 u -> Radian
@@ -138,12 +141,12 @@ module Geometry =
     let translationMatrix (dx : double) (dy : double) : Matrix3x3 = 
         M3x3(1.0, 0.0, dx,  0.0, 1.0, dy,  0.0, 0.0, 1.0)
     
-    let rotationMatrix : Radian -> Matrix3x3 = 
+    let rotationMatrix : Radians -> Matrix3x3 = 
         function | Rad(ang) -> M3x3 (cos ang, -(sin ang), 0.0, 
                                      sin ang, cos ang, 0.0,  
                                      0.0, 0.0, 1.0)
                   
-    let originatedRotationMatrix (ang : Radian) (pt : Point2) = 
+    let originatedRotationMatrix (ang : Radians) (pt : Point2) = 
         match pt with
         | P2(x,y) -> 
             let mT = translationMatrix x y

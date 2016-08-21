@@ -11,7 +11,8 @@
 #load "Geometry.fs"
 #load "GraphicProps.fs"
 #load "SvgDoc.fs"
-
+#load "TransformInternal.fs"
+#load "PictureInternal.fs"
 
 open System.Xml
 open System.Xml.Linq

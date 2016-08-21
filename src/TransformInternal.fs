@@ -8,8 +8,8 @@ module TransformInternal =
     /// Reify affine transformations as syntax.
     type AffineOperation = 
         | ApplyMatrix of Matrix3x3
-        | RotateBy of Radian
-        | RotateAbout of Radian * Point2
+        | RotateBy of Radians
+        | RotateAbout of Radians * Point2
         | ScaleBy of double * double
         | TranslateBy of double * double
         
@@ -29,7 +29,7 @@ module TransformInternal =
           CtmTransY : double
           CtmScaleX : double
           CtmScaleY : double
-          CtmRotation : Radian
+          CtmRotation : Radians
         }
     
     ///////////// TODO add a radians() constructor
