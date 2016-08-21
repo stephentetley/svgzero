@@ -27,3 +27,43 @@ module JoinList =
         go start xs
 
     let toList (xs : JoinList<'a>) : 'a list = joinfoldr (fun ys y -> y :: ys) [] xs
+
+    let one (x : 'a) : JoinList<'a> = Item(x)
+    
+    let cons (x : 'a) (xs : JoinList<'a>) : JoinList<'a> = Join(Item(x), xs)
+    
+    let snoc (xs : JoinList<'a>) (x : 'a) : JoinList<'a> = Join(xs, Item(x))
+    
+    /// Implementation detail - don't add Emptys
+    let append (xs : JoinList<'a>) (ys : JoinList<'a>) = 
+        match xs,ys with 
+        | Empty, zs -> zs
+        | zs, Empty -> zs
+        | _, _ -> Join (xs,ys)
+
+    /// Safe-head function
+    let tryHead (xs : JoinList<'a>) : 'a option = 
+        let rec step ys = 
+            match ys with
+            | Empty -> None
+            | Item(a) -> Some(a)
+            | Join(a,b) -> 
+                match step a with
+                | None -> step b
+                | Some(a) -> Some(a)
+        step xs
+        
+    type ViewLeft<'a> = 
+        | EmptyLeftView
+        | LeftList of 'a * JoinList<'a>
+    
+    let viewLeft (xs : JoinList<'a>) : ViewLeft<'a> = 
+        let rec step ys = 
+            match ys with
+            | Empty -> EmptyLeftView
+            | Item(a) -> LeftList(a, Empty)
+            | Join(left,right) -> 
+                match step left with
+                | EmptyLeftView -> step right
+                | LeftList(a,b) -> LeftList(a, append b right)
+        step xs

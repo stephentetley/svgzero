@@ -11,7 +11,9 @@ module Geometry =
         
         member v.GetY = match v with | V2(_,y) -> y
         
-        /// TODO - is this functional?
+        static member (+) (v1 : Vector2, v2 : Vector2) = match v1,v2 with | V2(x1,y1), V2(x2,y2) -> V2(x1+x2, y1+y2)
+        
+        /// TODO - is this functional or does it do in-place mutation?
         member v.Map (f : double -> double) = match v with | V2(x,y) -> V2 (f x, f y)
         
     /// TODO - should we have our own overloaded (mono) fmap for Vector, Point, Matrix... ?
@@ -21,14 +23,28 @@ module Geometry =
     
     
     type Point2 = 
-    | P2 of double * double
+        | P2 of double * double
+        
         member p.GetX = match p with | P2(x,_) -> x
         
         member p.GetY = match p with | P2(_,y) -> y
             
             
-    type Matrix3x3 = M3x3 of double * double * double  *  double * double * double  *  double * double * double
-
+    type Matrix3x3 = 
+        | M3x3 of double * double * double  *  double * double * double  *  double * double * double
+        
+        static member (+) (m1 : Matrix3x3, m2 : Matrix3x3) = 
+            match m1,m2 with
+            | M3x3(a,b,c,d,e,f,g,h,i), M3x3(m,n,o,p,q,r,s,t,u) -> 
+                M3x3(a+m, b+n, c+o,    d+p, e+q, f+r,    g+s, h+t, i+u)
+                      
+        
+        static member (*) (m1 : Matrix3x3, m2 : Matrix3x3) = 
+            match m1,m2 with
+            | M3x3(a,b,c,d,e,f,g,h,i), M3x3(m,n,o,p,q,r,s,t,u) ->
+                M3x3 (a*m+b*p+c*s,   a*n+b*q+c*t,   a*o+b*r+c*u,
+                      d*m+e*p+f*s,   d*n+e*q+f*t,   d*o+e*r+f*u,
+                      g*m+h*p+i*s,   g*n+h*q+i*t,   g*o+h*r+i*u)
 
     let lift2Vector2 (op : double -> double -> double) (v1 : Vector2) (v2 : Vector2) = 
         match v1,v2 with
@@ -114,4 +130,23 @@ module Geometry =
                 | (x,y) -> Math.PI + (atan (y/x))
 
 
-            
+    let identityMatrix : Matrix3x3 = M3x3(1.0, 0.0, 0.0,   0.0, 1.0, 0.0,  0.0, 0.0 ,1.0)
+    
+    let scalingMatrix (sx : double) (sy : double) : Matrix3x3 = 
+        M3x3 (sx, 0.0, 0.0,  0.0, sy, 0.0,  0.0, 0.0, 1.0)
+    
+    let translationMatrix (dx : double) (dy : double) : Matrix3x3 = 
+        M3x3(1.0, 0.0, dx,  0.0, 1.0, dy,  0.0, 0.0, 1.0)
+    
+    let rotationMatrix : Radian -> Matrix3x3 = 
+        function | Rad(ang) -> M3x3 (cos ang, -(sin ang), 0.0, 
+                                     sin ang, cos ang, 0.0,  
+                                     0.0, 0.0, 1.0)
+                  
+    let originatedRotationMatrix (ang : Radian) (pt : Point2) = 
+        match pt with
+        | P2(x,y) -> 
+            let mT = translationMatrix x y
+            let mTinv = translationMatrix (-x) (-y)
+            mT * rotationMatrix ang * mTinv        
+

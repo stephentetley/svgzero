@@ -26,6 +26,8 @@ module SvgDoc =
     
     let svgAttr (name : string) (value : string) : XAttribute = new XAttribute(XName.Get name, value )
 
+    let svgAttrs (name : string) (values : seq<string>) : XAttribute = svgAttr name (String.concat " " values)
+
     let elemSvg (body : seq<XElement>) : XElement = 
         let nsxlink : XNamespace = XNamespace.Get("http://www.w3.org/1999/xlink")
         let top = new XElement ( XName.Get ("svg", nssvg.NamespaceName ), 
@@ -62,21 +64,19 @@ module SvgDoc =
     let attrX (d : double) = svgAttr "x" (d.ToString())
     
     /// Seq version of attrX
-    let attrXs (ds : seq<double>) = 
-        let ss = Seq.map (fun d -> (d.ToString())) ds in svgAttr "x" (String.concat " " ss)
+    let attrXs (ds : seq<double>) = svgAttrs "x" <| Seq.map (fun d -> (d.ToString())) ds
     
     let attrY (d : double) = svgAttr "y" (d.ToString())
     
     /// Seq version of attrY
-    let attrYs (ds : seq<double>) = 
-        let ss = Seq.map (fun d -> (d.ToString())) ds in svgAttr "y" (String.concat " " ss)
+    let attrYs (ds : seq<double>) = svgAttrs "y" <| Seq.map (fun d -> (d.ToString())) ds
     
-    let attrR (d : double) : XAttribute = new XAttribute(XName.Get "r", d.ToString() )
-    let attrRx (d : double) : XAttribute = new XAttribute(XName.Get "rx", d.ToString() )
-    let attrRy (d : double) : XAttribute = new XAttribute(XName.Get "ry", d.ToString() )
+    let attrR (d : double) : XAttribute = svgAttr "r" (d.ToString())
+    let attrRx (d : double) : XAttribute = svgAttr "rx" (d.ToString())
+    let attrRy (d : double) : XAttribute = svgAttr "ry" (d.ToString())
 
-    let attrCx (d : double) : XAttribute = new XAttribute(XName.Get "cx", d.ToString() )
-    let attrCy (d : double) : XAttribute = new XAttribute(XName.Get "cy", d.ToString() )
+    let attrCx (d : double) : XAttribute = svgAttr "cx" (d.ToString())
+    let attrCy (d : double) : XAttribute = svgAttr "cy" (d.ToString())
 
     
     
