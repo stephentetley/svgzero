@@ -8,11 +8,13 @@
 #r "System.Xml.Linq"
 
 #load "Colour.fs"
+#load "JoinList.fs"
 #load "Geometry.fs"
 #load "GraphicProps.fs"
 #load "SvgDoc.fs"
 #load "TransformInternal.fs"
 #load "PictureInternal.fs"
+#load "SvgOutput.fs"
 
 open System.Xml
 open System.Xml.Linq

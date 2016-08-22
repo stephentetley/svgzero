@@ -90,7 +90,7 @@ module GraphicProps =
     type Space = 
         | Default | Preserve
         
-        member x.svgValue = 
+        member x.SvgValue = 
             match x with
             | Default -> "default"
             | Preserve -> "preserve"
