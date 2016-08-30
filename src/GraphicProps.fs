@@ -76,11 +76,11 @@ module GraphicProps =
             | Dasharray (dasharray) -> dasharrayValue dasharray
     
     type TextDecoration = 
-        | None | Underline | Overline | LineThrough | Blink
+        | NoDecoration | Underline | Overline | LineThrough | Blink
         
         member x.SvgValue = 
             match x with
-            | None -> "none"
+            | NoDecoration -> "none"
             | Underline -> "underline"
             | Overline -> "overline"
             | LineThrough -> "line-through"
@@ -143,7 +143,7 @@ module GraphicProps =
     /// Rect Circle Ellipse Line Polyline Polygon
     /// Having (Rect, Circle, Ellipse) in both input and output is a good optimization.
     
-    /// We "might as well" model Polygon and Polyline as we want a graphic model close
+    /// We might as well model Polygon and Polyline as we want a graphic model close
     /// to SVG. If we model Polyline we can recover Line as one segment Polylines
     
     
@@ -167,3 +167,21 @@ module GraphicProps =
       { StrokeColour : Colour
         StrokeWidth : double
       }
+
+
+    type ShapeRender =
+      | RenderFill of Colour      
+      | RenderStroke of Colour * double
+      | RenderFillStroke of Colour * Colour * double
+    
+    
+    let renderRectShape (props : RectProps) : ShapeRender = 
+        match props.FillColour, props.StrokeColour, props.StrokeWidth with
+        | Some(fill), Some(stroke), d -> RenderFillStroke(fill, stroke, d)
+        | Some(fill), None, _ -> RenderFill(fill)
+        | None, Some(stroke), d -> RenderStroke(stroke,d)
+        | _,_,_ -> failwith "renderRectShape todo"
+
+
+        
+        

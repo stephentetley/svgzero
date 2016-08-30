@@ -9,7 +9,10 @@ open SvgZero.GraphicProps
 
 module SvgDoc = 
     
-
+    
+    /// Aliases so we don't need System.Xml.Linq namespace everywhere
+    type SVGElement = XElement
+    type SVGAttribute = XAttribute
 
     let nssvg : XNamespace = XNamespace.Get("http://www.w3.org/2000/svg")
 

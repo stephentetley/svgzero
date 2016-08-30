@@ -11,9 +11,18 @@ module PictureInternal =
     
     type SvgID = SvgID of string
     
+    /// TODO - for simplicity, initially we should avoid adding a CTM to each primitive.
+    /// We have already shown how to work with elements attributed with a CTM in Wumpus, we can crib
+    /// this strategy later when we need to flesh out SvgZero's capabilities.
+    ///
+    /// Design note - supporting CSS styling (to minimize file size and allow independent change) 
+    /// should probably be a higher priority than local (elementary) CTM transformations.
+    
+    
+
     /// A char paired with its displacement from the previous char.
     /// Used for display text.
-    type SpacedChar = SpacedChar of double * char
+    type SpacedChar = double * char
     
     type LabelText = 
         | LabelBody of string
@@ -21,23 +30,22 @@ module PictureInternal =
         | SpacedV of SpacedChar list
         
     type PrimLabel = 
-        { LabelBody : LabelText; OptLabelId : Option<SvgID>; LabelCTM : PrimCTM }
+      { LabelBody : LabelText
+        OptLabelId : Option<SvgID>
+      }
 
     type PrimEllipse = 
       { HalfWidth : double
         HalfHeight : double
-        EllipseCTM : PrimCTM
       }
         
     type PrimCircle = 
       { Radius : double
-        CircleCTM : PrimCTM
       }
       
     type PrimRectangle = 
       { Width : double
         Height : double
-        RectCTM : PrimCTM
       }
       
     /// Paths - SVG supports both absolute and relative paths - should we support both?
@@ -50,7 +58,6 @@ module PictureInternal =
     type PrimRelPath = 
       { RelPathStart : Point2 
         RelPathSegments : RelPathSegment list
-        RelPathCTM : PrimCTM
       }
       
     type AbsPathSegment = 
@@ -59,13 +66,16 @@ module PictureInternal =
       
     type PrimAbsPath = 
       { AbsPathSegments : AbsPathSegment list
-        AbsPathCTM : PrimCTM
       }
       
     type PrimPath =
        | AbsolutePath of PrimAbsPath
        | RelativePath of PrimRelPath
-      
+
+    type PrimPolyline = { PolylinePoints : Point2 list }
+    
+    type PrimPolygon = { PolygonPoints : Point2 list }
+
     /// More to add (see Wumpus) ...
     type Primitive = 
       | PGroup of JoinList<Primitive>
@@ -74,6 +84,8 @@ module PictureInternal =
       | PEllipse of ShapeProps * PrimEllipse
       | PCircle of ShapeProps * PrimCircle
       | PRectangle of RectProps * PrimRectangle
+      | PPolyline of LineProps * PrimPolyline
+      | PPolygon of LineProps * PrimPolygon
 
 
     type GraphicsState = 
