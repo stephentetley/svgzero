@@ -146,7 +146,12 @@ module GraphicProps =
     /// We might as well model Polygon and Polyline as we want a graphic model close
     /// to SVG. If we model Polyline we can recover Line as one segment Polylines
     
-    
+    /// Note - RoundingX and RoundingY should probably be cases of a sum type rather than fields 
+    /// of a record. A list of properties (to always render) better models optional SVG attributes 
+    /// rather than mandatory record fields that we might chose not to print if they are the default 
+    /// value. This allows local overrides if we use a style sheet.
+    ///
+    /// This also applies to stroke attributes of paths and font attributes of labels.
     type RectProps = 
       { RoundingX : double
         RoundingY : double
@@ -168,7 +173,7 @@ module GraphicProps =
         StrokeWidth : double
       }
 
-
+    /// We don't need this intermediate type if we are not "diffing" attributes to minimize output size
     type ShapeRender =
       | RenderFill of Colour      
       | RenderStroke of Colour * double

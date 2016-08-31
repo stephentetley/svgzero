@@ -8,11 +8,20 @@ open SvgZero.GraphicProps
 open SvgZero.SvgDoc
 open SvgZero.PictureInternal
 
-module SvgOutput = 
+module OutputSvg = 
+
 
     /// Design note - the "trick" used by Wumpus to avoid printing style attributes unless they different
-    /// from the parent graphic context is potentially not worthwhile (ie. adds complexity) if CSS properties 
-    /// or SVG use/defs can be used instead to minimize files size.
+    /// from the parent graphic context is potentially not worthwhile ie. adds complexity for limited gain 
+    /// if CSS properties or SVG use/defs can be used instead to minimize files size.
+    ///
+    /// This means SvgMonad might not need GraphicsState - potentially we might need to thread a CTM through
+    /// output generation. 
+    ///
+    /// That said path styles (miter, cap-butt etc.) are so "rare" they might be better as local (override) 
+    /// attributes. Path styles might be better modeled as a set of properties (only print ones in the set) 
+    /// rather than a fixed record of properties. 
+
 
     type ClipCount = int
 
@@ -37,25 +46,11 @@ module SvgOutput =
 
     let makeXY = function | P2(x,y) -> [ attrX x ; attrY y ]
 
-    /// Design note - kerning (stretched text) is probably a distraction at the moment...
 
-    /// This is for horizontal kerning text, the output is of the 
-    /// form:
-    ///  
-    /// > x="0 10 25 35" y="0"
-    ///
-    /// makeXsY :: DPoint2 -> [KerningChar] -> Doc
-    let makeXsY (pt : Point2) (ks : SpacedChar list) : XAttribute list = 
-        let rec step ax ls = 
-            match ls with 
-            | (d,_) :: ds -> let a = ax+d in a :: step a ds 
-            | [] -> []
-        [ attrXs (step pt.GetX ks); attrY pt.GetY ]
-
-    let ellipseProps (attrs : ShapeProps) : SvgMonad<SVGAttribute list> = 
+    let ellipseProps (attrs : ShapeProps) : SvgMonad<SvgAttribute list> = 
         unit []
         
-    let primEllipse (attrs : ShapeProps) (obj : PrimEllipse) : SvgMonad<SVGElement> = 
+    let primEllipse (attrs : ShapeProps) (obj : PrimEllipse) : SvgMonad<SvgElement> = 
         let arx = attrRx obj.HalfWidth
         let ary = attrRy obj.HalfHeight
         unit <| elemEllipse [ arx; ary ]

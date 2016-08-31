@@ -24,10 +24,9 @@ module PictureInternal =
     /// Used for display text.
     type SpacedChar = double * char
     
-    type LabelText = 
-        | LabelBody of string
-        | SpacedH of SpacedChar list
-        | SpacedV of SpacedChar list
+    /// For the time being don't bother with spaced text
+    type LabelText = LabelBody of string
+
         
     type PrimLabel = 
       { LabelBody : LabelText

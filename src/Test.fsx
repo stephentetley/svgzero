@@ -14,7 +14,7 @@
 #load "SvgDoc.fs"
 #load "TransformInternal.fs"
 #load "PictureInternal.fs"
-#load "SvgOutput.fs"
+#load "OutputSvg.fs"
 
 open System.Xml
 open System.Xml.Linq

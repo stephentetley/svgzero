@@ -10,59 +10,59 @@ open SvgZero.GraphicProps
 module SvgDoc = 
     
     
-    /// Aliases so we don't need System.Xml.Linq namespace everywhere
-    type SVGElement = XElement
-    type SVGAttribute = XAttribute
+    /// Aliases so we don't need to reference System.Xml.Linq namespace everywhere
+    type SvgElement = XElement
+    type SvgAttribute = XAttribute
 
     let nssvg : XNamespace = XNamespace.Get("http://www.w3.org/2000/svg")
 
-    let svgElem (name : string) (attrs : seq<XAttribute>) = new XElement (nssvg + name, attrs )  
+    let svgElem (name : string) (attrs : seq<SvgAttribute>) = new SvgElement (nssvg + name, attrs )  
 
-    let svgElemBs (name : string) (attrs : seq<XAttribute>) (elems : seq<XElement>) = 
-        new XElement (XName.Get name, attrs, elems)  
+    let svgElemBs (name : string) (attrs : seq<SvgAttribute>) (elems : seq<SvgElement>) = 
+        new SvgElement (XName.Get name, attrs, elems)  
         
-    let svgElemB1 (name : string) (attrs : seq<XAttribute>) (elem : XElement) = 
-        new XElement (XName.Get name, attrs, elem) 
+    let svgElemB1 (name : string) (attrs : seq<SvgAttribute>) (elem : SvgElement) = 
+        new SvgElement (XName.Get name, attrs, elem) 
 
-    let svgElemNoAttrs (name : string) (elems : seq<XElement>) = 
-        new XElement (XName.Get name, elems)  
+    let svgElemNoAttrs (name : string) (elems : seq<SvgElement>) = 
+        new SvgElement (XName.Get name, elems)  
     
-    let svgAttr (name : string) (value : string) : XAttribute = new XAttribute(XName.Get name, value )
+    let svgAttr (name : string) (value : string) : SvgAttribute = new SvgAttribute(XName.Get name, value )
 
-    let svgAttrs (name : string) (values : seq<string>) : XAttribute = svgAttr name (String.concat " " values)
+    let svgAttrs (name : string) (values : seq<string>) : SvgAttribute = svgAttr name (String.concat " " values)
 
-    let elemSvg (body : seq<XElement>) : XElement = 
+    let elemSvg (body : seq<SvgElement>) : SvgElement = 
         let nsxlink : XNamespace = XNamespace.Get("http://www.w3.org/1999/xlink")
-        let top = new XElement ( XName.Get ("svg", nssvg.NamespaceName ), 
-                                 new XAttribute(XName.Get "version", "1.1"),
-                                 new XAttribute(XNamespace.Xmlns + "xlink", nsxlink))
+        let top = new SvgElement ( XName.Get ("svg", nssvg.NamespaceName ), 
+                                 new SvgAttribute(XName.Get "version", "1.1"),
+                                 new SvgAttribute(XNamespace.Xmlns + "xlink", nsxlink))
         top.Add body
         top
                                
 
-    let elemG (attrs : seq<XAttribute>) (body : seq<XElement>) = svgElemBs "g" attrs body
+    let elemG (attrs : seq<SvgAttribute>) (body : seq<SvgElement>) = svgElemBs "g" attrs body
     
-    let elemG1 (attrs : seq<XAttribute>) (body : XElement) = svgElemB1 "g" attrs body
+    let elemG1 (attrs : seq<SvgAttribute>) (body : SvgElement) = svgElemB1 "g" attrs body
     
-    let elemGNoAttrs (body : seq<XElement>) = svgElemNoAttrs "g" body
+    let elemGNoAttrs (body : seq<SvgElement>) = svgElemNoAttrs "g" body
     
-    let elemClipPath (attrs : seq<XAttribute>) (body : seq<XElement>) = svgElemBs "clipPath" attrs body
+    let elemClipPath (attrs : seq<SvgAttribute>) (body : seq<SvgElement>) = svgElemBs "clipPath" attrs body
     
-    let elemPath (attrs : seq<XAttribute>) (path : string) = 
+    let elemPath (attrs : seq<SvgAttribute>) (path : string) = 
         let attrs2 = Seq.append attrs (Seq.singleton <| svgAttr "d" path)
         svgElem "path" attrs2
     
     let elemPathNoAttrs (path : string) = svgElem "path" [svgAttr "d" path]
     
-    let elemText (attrs : seq<XAttribute>) (body : seq<XElement>) = svgElemBs "text" attrs body
+    let elemText (attrs : seq<SvgAttribute>) (body : seq<SvgElement>) = svgElemBs "text" attrs body
 
-    let elemTspan (attrs : seq<XAttribute>) (body : XElement) : XElement = svgElemB1 "tspan" attrs body
+    let elemTspan (attrs : seq<SvgAttribute>) (body : SvgElement) : SvgElement = svgElemB1 "tspan" attrs body
     
-    let elemCircle (attrs : seq<XAttribute>) : XElement = svgElem "circle" attrs
+    let elemCircle (attrs : seq<SvgAttribute>) : SvgElement = svgElem "circle" attrs
     
-    let elemEllipse (attrs : seq<XAttribute>) : XElement = svgElem "ellipse" attrs
+    let elemEllipse (attrs : seq<SvgAttribute>) : SvgElement = svgElem "ellipse" attrs
     
-    let attrId (s : string) : XAttribute = new XAttribute(XName.Get "id", s )
+    let attrId (s : string) : SvgAttribute = new SvgAttribute(XName.Get "id", s )
     
     let attrX (d : double) = svgAttr "x" (d.ToString())
     
@@ -74,12 +74,12 @@ module SvgDoc =
     /// Seq version of attrY
     let attrYs (ds : seq<double>) = svgAttrs "y" <| Seq.map (fun d -> (d.ToString())) ds
     
-    let attrR (d : double) : XAttribute = svgAttr "r" (d.ToString())
-    let attrRx (d : double) : XAttribute = svgAttr "rx" (d.ToString())
-    let attrRy (d : double) : XAttribute = svgAttr "ry" (d.ToString())
+    let attrR (d : double) : SvgAttribute = svgAttr "r" (d.ToString())
+    let attrRx (d : double) : SvgAttribute = svgAttr "rx" (d.ToString())
+    let attrRy (d : double) : SvgAttribute = svgAttr "ry" (d.ToString())
 
-    let attrCx (d : double) : XAttribute = svgAttr "cx" (d.ToString())
-    let attrCy (d : double) : XAttribute = svgAttr "cy" (d.ToString())
+    let attrCx (d : double) : SvgAttribute = svgAttr "cx" (d.ToString())
+    let attrCy (d : double) : SvgAttribute = svgAttr "cy" (d.ToString())
 
     
     
@@ -136,7 +136,8 @@ module SvgDoc =
     let attrStrokeWidth (d : double) = svgAttr "stroke-width" (d.ToString())
     
     /// stroke-miterlimit="..."
-    let attrStrokeMiterlimit (d : double) = svgAttr "stroke-miterlimit" (d.ToString())    
+    let attrStrokeMiterlimit (d : double) = svgAttr "stroke-miterlimit" (d.ToString()) 
+    
     /// stroke-linecap="..." 
     let attrStrokeLinecap (x : StrokeLinecap) = svgAttr "stroke-linecap" x.SvgValue
     
@@ -158,6 +159,5 @@ module SvgDoc =
     let valRotate (r : Radians) : string = sprintf "rotate(%f)" (rad2Deg r)
     
     let valScale (x : double) (y : double) = sprintf "scale(%f,%f)" x y
-    
     
     
