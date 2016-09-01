@@ -95,49 +95,41 @@ module GraphicProps =
             | Default -> "default"
             | Preserve -> "preserve"
 
-    /// Stroke attributes for drawing paths.
+
+    /// Optional stroke attributes for drawing paths.
+    /// Note stroke-width and stroke-colour are considered a mandatory attributes.
     type StrokeAttr = 
-      { LineWidth : double
-        MiterLimit : double
-        Cap : StrokeLinecap
-        Join : StrokeLinejoin
-        DashPattern : StrokeDasharray
-      }
+      | MiterLimit of double
+      | LineCap of StrokeLinecap
+      | LineJoin of StrokeLinejoin
+      | DashPattern of StrokeDasharray
 
 
-    /// TODO - following Wumpus might not be best for an SVG-only library (Wumpus may itself be flawed)
+
+    /// Difference to Wumpus (Wumpus probably got it wrong):
     /// Closing a path now seems more related to its shape (points) than its style (stroke attributes /
     /// colour).
 
     type PathProps = 
       { PathColour : Colour
-        LineAttrs : StrokeAttr
+        LineAttrs : StrokeAttr list
       }
-
-//    type PathProps =
-//        | ClosedFill of { PathColour : Colour }
-//        | ClosedStroke of { PathAttrs : StrokeAttrs; PathColour : Colour }
-//        | OpenStroke of { PathAttrs : StrokeAttrs; PathColour : Colour }
-//        | ClosedFilled of { PathAttrs : StrokeAttrs; PathColour : Colour, FillColour : Colour }
-        
-        
+   
         
     type FontFace = { FontName : string }
-        
     
+
     type FontAttr =  
-      { FontSize : int 
-        Face : FontFace
-        Style : FontStyle
-        Variant : FontVariant
-        Weight : FontWeight
-      }
+      | FontSize of int 
+      | FontFace of FontFace
+      | FontStyle of FontStyle
+      | FontVariant of FontVariant
+      | FontWeight of FontWeight
         
     type LabelProps = 
       { LabelColour : Colour
-        LabelFont : FontAttr
+        FontAttrs : FontAttr list
       }
-      
     
     /// Note - SVG has builtins for:
     /// Rect Circle Ellipse Line Polyline Polygon
@@ -152,41 +144,28 @@ module GraphicProps =
     /// value. This allows local overrides if we use a style sheet.
     ///
     /// This also applies to stroke attributes of paths and font attributes of labels.
-    type RectProps = 
-      { RoundingX : double
-        RoundingY : double
-        FillColour : Option<Colour>
-        StrokeColour : Option<Colour>
-        StrokeWidth : double
-      }
-    
-    
-    /// Circle, Ellipse, Polygon
-    type ShapeProps =
-      { FillColour : Option<Colour>
-        StrokeColour : Option<Colour>
-        StrokeWidth : double
-      }
-    
-    type LineProps =
+
+    type StrokeProps =
       { StrokeColour : Colour
         StrokeWidth : double
+      }      
+    
+    /// Circle, Ellipse, Polygon
+    /// Shape can be filled (no border), stroked (just border) or filled-stroked (background fill and border)
+    /// If it has no Fill or Stroke props it should ... not be rendered? (or inherit defaults?)
+    type ShapeProps =
+      { ShapeFill : Option<Colour>
+        ShapeStroke : Option<StrokeProps>
       }
-
-    /// We don't need this intermediate type if we are not "diffing" attributes to minimize output size
-    type ShapeRender =
-      | RenderFill of Colour      
-      | RenderStroke of Colour * double
-      | RenderFillStroke of Colour * Colour * double
     
-    
-    let renderRectShape (props : RectProps) : ShapeRender = 
-        match props.FillColour, props.StrokeColour, props.StrokeWidth with
-        | Some(fill), Some(stroke), d -> RenderFillStroke(fill, stroke, d)
-        | Some(fill), None, _ -> RenderFill(fill)
-        | None, Some(stroke), d -> RenderStroke(stroke,d)
-        | _,_,_ -> failwith "renderRectShape todo"
-
+    /// Rect a special shape - can have rounded corners
+    type RectAttr = 
+      | RectRounding of double * double
+      
+    type RectProps = 
+      { RectAttrs : RectAttr list
+        RectProps : ShapeProps
+      }
 
         
         

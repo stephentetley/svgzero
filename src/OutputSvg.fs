@@ -47,11 +47,18 @@ module OutputSvg =
     let makeXY = function | P2(x,y) -> [ attrX x ; attrY y ]
 
 
-    let ellipseProps (attrs : ShapeProps) : SvgMonad<SvgAttribute list> = 
-        unit []
-        
-    let primEllipse (attrs : ShapeProps) (obj : PrimEllipse) : SvgMonad<SvgElement> = 
-        let arx = attrRx obj.HalfWidth
-        let ary = attrRy obj.HalfHeight
-        unit <| elemEllipse [ arx; ary ]
+    let shapeProps (props : ShapeProps) : SvgAttribute list = 
+        let makeStroke = function | { StrokeColour =rgb; StrokeWidth = d} -> [attrStroke rgb; attrStrokeWidth d ]
+        match props with
+        | {ShapeFill = ofill; ShapeStroke = ostroke} -> 
+            match ofill, ostroke with 
+            | Some(fill), Some(stroke) -> attrFill fill :: makeStroke stroke                                                                                    
+            | Some(fill), None -> [attrFill fill; attrStrokeNone ()]
+            | None, Some(stroke) -> makeStroke stroke
+            | None, None -> [attrStrokeNone ()]
+            
+                    
+    let primEllipse (props : ShapeProps) (obj : PrimEllipse) : SvgElement = 
+        let xs = shapeProps props
+        elemEllipse <| attrRx obj.HalfWidth :: attrRy obj.HalfHeight :: xs
         

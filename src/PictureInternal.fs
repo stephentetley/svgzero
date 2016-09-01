@@ -83,8 +83,8 @@ module PictureInternal =
       | PEllipse of ShapeProps * PrimEllipse
       | PCircle of ShapeProps * PrimCircle
       | PRectangle of RectProps * PrimRectangle
-      | PPolyline of LineProps * PrimPolyline
-      | PPolygon of LineProps * PrimPolygon
+      | PPolyline of StrokeProps * PrimPolyline
+      | PPolygon of StrokeProps * PrimPolygon
 
 
     type GraphicsState = 
