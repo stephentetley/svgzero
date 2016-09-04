@@ -13,19 +13,21 @@ module SvgDoc =
     /// Aliases so we don't need to reference System.Xml.Linq namespace everywhere
     type SvgElement = XElement
     type SvgAttribute = XAttribute
+    type SvgText = XText
+    type SvgDocument = XDocument
 
     let nssvg : XNamespace = XNamespace.Get("http://www.w3.org/2000/svg")
 
     let svgElem (name : string) (attrs : seq<SvgAttribute>) = new SvgElement (nssvg + name, attrs )  
 
     let svgElemBs (name : string) (attrs : seq<SvgAttribute>) (elems : seq<SvgElement>) = 
-        new SvgElement (XName.Get name, attrs, elems)  
+        new SvgElement (nssvg + name, attrs, elems)  
         
     let svgElemB1 (name : string) (attrs : seq<SvgAttribute>) (elem : SvgElement) = 
-        new SvgElement (XName.Get name, attrs, elem) 
+        new SvgElement (nssvg + name, attrs, elem) 
 
     let svgElemNoAttrs (name : string) (elems : seq<SvgElement>) = 
-        new SvgElement (XName.Get name, elems)  
+        new SvgElement (nssvg + name, elems)  
     
     let svgAttr (name : string) (value : string) : SvgAttribute = new SvgAttribute(XName.Get name, value )
 
@@ -54,10 +56,12 @@ module SvgDoc =
     
     let elemPathNoAttrs (path : string) = svgElem "path" [svgAttr "d" path]
     
-    let elemText (attrs : seq<SvgAttribute>) (body : seq<SvgElement>) = svgElemBs "text" attrs body
+    let elemText (attrs : seq<SvgAttribute>) (body : string) = new SvgElement (XName.Get "text", attrs, new XText(body))
 
     let elemTspan (attrs : seq<SvgAttribute>) (body : SvgElement) : SvgElement = svgElemB1 "tspan" attrs body
     
+    let elemRect (attrs : seq<SvgAttribute>) : SvgElement = svgElem "rect" attrs
+
     let elemCircle (attrs : seq<SvgAttribute>) : SvgElement = svgElem "circle" attrs
     
     let elemEllipse (attrs : seq<SvgAttribute>) : SvgElement = svgElem "ellipse" attrs
@@ -74,6 +78,9 @@ module SvgDoc =
     /// Seq version of attrY
     let attrYs (ds : seq<double>) = svgAttrs "y" <| Seq.map (fun d -> (d.ToString())) ds
     
+    let attrWidth (d : double) : SvgAttribute = svgAttr "width" (d.ToString())
+    let attrHeight (d : double) : SvgAttribute = svgAttr "height" (d.ToString())
+
     let attrR (d : double) : SvgAttribute = svgAttr "r" (d.ToString())
     let attrRx (d : double) : SvgAttribute = svgAttr "rx" (d.ToString())
     let attrRy (d : double) : SvgAttribute = svgAttr "ry" (d.ToString())
@@ -160,4 +167,13 @@ module SvgDoc =
     
     let valScale (x : double) (y : double) = sprintf "scale(%f,%f)" x y
     
-    
+    let document (content : SvgElement) : SvgDocument = 
+        let d1 = new XDocument (new XDeclaration("1.0", "utf-8", "true")) 
+        let nsxlink : XNamespace = XNamespace.Get("http://www.w3.org/1999/xlink")
+        let root = new XElement ( XName.Get ("svg", nssvg.NamespaceName ), 
+                                  new XAttribute(XName.Get "version", "1.1"),
+                                  new XAttribute(XNamespace.Xmlns + "xlink", nsxlink)
+                                ) 
+        root.Add content
+        d1.Add root
+        d1

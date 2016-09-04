@@ -21,6 +21,7 @@ open System.Xml.Linq
 
 open SvgZero
 open SvgZero.Colour
+open SvgZero.JoinList
 open SvgZero.Geometry
 open SvgZero.GraphicProps
 open SvgZero.SvgDoc
@@ -60,10 +61,17 @@ let testy02 = doc2.ToString()
 let mdoc1 : SvgMonad<SvgElement> = 
     let fillRed = { ShapeFill= Some(Named("red")); ShapeStroke=None }
     let prim1 = PEllipse(fillRed, P2(0.0,0.0), { HalfWidth =5.0; HalfHeight=5.0 } )
-    primitive prim1
+    group <| fromList [prim1]
+    
 
 
 let testy03 = 
     let ma = mdoc1
     (fun d -> d.ToString()) <| runSvg ma
 
+let testy04 = 
+    let fillRed = { ShapeFill= Some(Named("red")); ShapeStroke=None }
+    let prim1 = PEllipse(fillRed, P2(100.0, 50.0), { HalfWidth =5.0; HalfHeight=5.0 } )
+    let doc1 = svgDraw <| Leaf (fromList [prim1])
+    doc1.ToString()
+    

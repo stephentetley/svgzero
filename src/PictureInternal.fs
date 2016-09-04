@@ -19,13 +19,9 @@ module PictureInternal =
     /// should probably be a higher priority than local (elementary) CTM transformations.
     
     
-
-    /// A char paired with its displacement from the previous char.
-    /// Used for display text.
-    type SpacedChar = double * char
     
     /// For the time being don't bother with spaced text
-    type LabelText = LabelBody of string
+    type LabelText = LabelText of string
 
         
     type PrimLabel = 
@@ -33,20 +29,22 @@ module PictureInternal =
         OptLabelId : Option<SvgID>
       }
 
-    type PrimEllipse = 
-      { HalfWidth : double
-        HalfHeight : double
-      }
-        
-    type PrimCircle = 
-      { Radius : double
-      }
+
       
     type PrimRectangle = 
       { Width : double
         Height : double
       }
-      
+        
+    type PrimCircle = 
+      { Radius : double
+      }
+
+    type PrimEllipse = 
+      { HalfWidth : double
+        HalfHeight : double
+      }
+
     /// Paths - SVG supports both absolute and relative paths - should we support both?
     /// Probably - then a user can choose which makes sense for their application.
     
@@ -79,13 +77,18 @@ module PictureInternal =
     type Primitive = 
       | PGroup of JoinList<Primitive>
       | PClip of PrimPath * Primitive
-      | PLabel of LabelProps * PrimLabel
-      | PEllipse of ShapeProps * Point2 * PrimEllipse
+      | PLabel of LabelProps * Point2 * PrimLabel
+      | PRectangle of RectProps * Point2 * PrimRectangle
       | PCircle of ShapeProps * Point2 * PrimCircle
-      | PRectangle of RectProps * PrimRectangle
+      | PEllipse of ShapeProps * Point2 * PrimEllipse
       | PPolyline of StrokeProps * PrimPolyline
       | PPolygon of StrokeProps *  PrimPolygon
 
+    type Picture = 
+      | Leaf of JoinList<Primitive>
+      | Picture of JoinList<Picture>
+
+        
     /// Not sure if we need this, maybe it should just be a CTM when (/ if) we add
     /// that back
     type GraphicsState = unit

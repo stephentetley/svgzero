@@ -26,14 +26,18 @@ module JoinList =
             | Join(t,u) -> let ac1 = go ac u in go ac1 t
         go start xs
 
-    let toList (xs : JoinList<'a>) : 'a list = joinfoldr (fun ys y -> y :: ys) [] xs
+
 
     let one (x : 'a) : JoinList<'a> = Item(x)
     
     let cons (x : 'a) (xs : JoinList<'a>) : JoinList<'a> = Join(Item(x), xs)
     
     let snoc (xs : JoinList<'a>) (x : 'a) : JoinList<'a> = Join(xs, Item(x))
-    
+
+    let toList (xs : JoinList<'a>) : 'a list = joinfoldr (fun ys y -> y :: ys) [] xs
+
+    let fromList (xs : 'a list) : JoinList<'a> = List.foldBack cons xs Empty
+        
     /// Implementation detail - don't add Emptys
     let append (xs : JoinList<'a>) (ys : JoinList<'a>) = 
         match xs,ys with 

@@ -3,6 +3,7 @@
 open System.Xml
 open System.Xml.Linq
 
+open SvgZero.JoinList
 open SvgZero.Geometry
 open SvgZero.GraphicProps
 open SvgZero.SvgDoc
@@ -41,12 +42,24 @@ module OutputSvg =
 
     let svgoutput = new SvgMonadBuilder()
     
+    let mapM (mf : 'a -> SvgMonad<'b>) (inp : 'a list) : SvgMonad<'b list> = 
+        let rec work ys = 
+            match ys with
+            | [] -> svgoutput.Return []
+            | z :: zs -> svgoutput { let! b = mf z
+                                     let! bs = work zs
+                                     return (b :: bs) }
+        work inp
+
     let runSvg (ma : SvgMonad<'a>) : 'a = let (a,_) = apply1 ma () 0 in a
 
     let makeTspan rgb xelem = elemTspan [attrFill rgb] xelem
 
     let makeXY = function | P2(x,y) -> [ attrX x ; attrY y ]
 
+    let labelProps (props : LabelProps) : SvgAttribute list = 
+        let xs = []
+        attrFill props.LabelColour :: xs
 
     let shapeProps (props : ShapeProps) : SvgAttribute list = 
         let makeStroke : StrokeProps -> SvgAttribute list = 
@@ -58,18 +71,65 @@ module OutputSvg =
             | Some(fill), None -> [attrFill fill; attrStrokeNone ()]
             | None, Some(stroke) -> makeStroke stroke
             | None, None -> [attrStrokeNone ()]
-            
-                    
+
+    let primLabel1 (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgElement =
+        let attrs = labelProps props
+        let cs = [attrX pt.GetX; attrY pt.GetY]
+        let text = match obj.LabelBody with | LabelText(a) -> a
+        elemText (attrs @ cs) text
+
+    let primRect1 (props : RectProps) (pt : Point2) (obj : PrimRectangle) : SvgElement = 
+        let ps = shapeProps props.RectProps
+        let cs = [attrX pt.GetX; attrY pt.GetY]
+        let wh = [attrWidth obj.Width; attrHeight obj.Height ]
+        elemRect <| ps @ cs @ wh
+
+    let primCircle1 (props : ShapeProps) (pt : Point2) (obj : PrimCircle) : SvgElement = 
+        let ps = shapeProps props
+        let cs = [attrCx pt.GetX; attrCy pt.GetY]
+        let rs = [attrRx obj.Radius]
+        elemCircle <| ps @ rs @ cs
+                
     let primEllipse1 (props : ShapeProps) (pt : Point2) (obj : PrimEllipse) : SvgElement = 
         let ps = shapeProps props
         let cs = [attrCx pt.GetX; attrCy pt.GetY]
         let rs = [attrRx obj.HalfWidth; attrRy obj.HalfHeight]
         elemEllipse <| ps @ rs @ cs
 
+
     /// Potentially we may have to change center point due to CTM...
+    let primLabel (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgMonad<SvgElement> = 
+        svgoutput.Return <| primLabel1 props pt obj 
+
+    let primRect (props : RectProps) (pt : Point2) (obj : PrimRectangle) : SvgMonad<SvgElement> = 
+        svgoutput.Return <| primRect1 props pt obj 
+
+    let primCircle (props : ShapeProps) (pt : Point2) (obj : PrimCircle) : SvgMonad<SvgElement> = 
+        svgoutput.Return <| primCircle1 props pt obj 
+
     let primEllipse (props : ShapeProps) (pt : Point2) (obj : PrimEllipse) : SvgMonad<SvgElement> = 
         svgoutput.Return <| primEllipse1 props pt obj 
 
-    let primitive (prim : Primitive) : SvgMonad<SvgElement> = 
+    let rec primitive (prim : Primitive) : SvgMonad<SvgElement> = 
         match prim with
+        | PGroup(objs) -> group objs
+        | PLabel(props,pt,obj) -> primLabel props pt obj
+        | PRectangle(props,pt,obj) -> primRect props pt obj
+        | PCircle(props,pt,obj) -> primCircle props pt obj
         | PEllipse(props,pt,obj) -> primEllipse props pt obj
+
+    and group (objs : JoinList<Primitive>) : SvgMonad<SvgElement> = 
+        svgoutput { let! body = mapM primitive (toList objs)
+                    return (elemGNoAttrs body)
+                  }
+
+    let rec picture (obj : Picture) : SvgMonad<SvgElement> =
+        match obj with
+        | Leaf(prims) -> group prims
+        | Picture(pics) ->  
+            svgoutput { let! body = mapM picture (toList pics)
+                        return (elemGNoAttrs body)
+                      }
+
+    let svgDraw (obj : Picture) : SvgDocument = 
+        let body = runSvg (picture obj) in document body
