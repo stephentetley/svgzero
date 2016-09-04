@@ -40,7 +40,8 @@ module OutputSvg =
         member self.Bind (p,f) = bind p f
 
     let svgoutput = new SvgMonadBuilder()
-        
+    
+    let runSvg (ma : SvgMonad<'a>) : 'a = let (a,_) = apply1 ma () 0 in a
 
     let makeTspan rgb xelem = elemTspan [attrFill rgb] xelem
 
@@ -48,7 +49,8 @@ module OutputSvg =
 
 
     let shapeProps (props : ShapeProps) : SvgAttribute list = 
-        let makeStroke = function | { StrokeColour =rgb; StrokeWidth = d} -> [attrStroke rgb; attrStrokeWidth d ]
+        let makeStroke : StrokeProps -> SvgAttribute list = 
+            function | { StrokeColour =rgb; StrokeWidth = d} -> [attrStroke rgb; attrStrokeWidth d ]
         match props with
         | {ShapeFill = ofill; ShapeStroke = ostroke} -> 
             match ofill, ostroke with 
@@ -58,7 +60,16 @@ module OutputSvg =
             | None, None -> [attrStrokeNone ()]
             
                     
-    let primEllipse (props : ShapeProps) (obj : PrimEllipse) : SvgElement = 
-        let xs = shapeProps props
-        elemEllipse <| attrRx obj.HalfWidth :: attrRy obj.HalfHeight :: xs
-        
+    let primEllipse1 (props : ShapeProps) (pt : Point2) (obj : PrimEllipse) : SvgElement = 
+        let ps = shapeProps props
+        let cs = [attrCx pt.GetX; attrCy pt.GetY]
+        let rs = [attrRx obj.HalfWidth; attrRy obj.HalfHeight]
+        elemEllipse <| ps @ rs @ cs
+
+    /// Potentially we may have to change center point due to CTM...
+    let primEllipse (props : ShapeProps) (pt : Point2) (obj : PrimEllipse) : SvgMonad<SvgElement> = 
+        svgoutput.Return <| primEllipse1 props pt obj 
+
+    let primitive (prim : Primitive) : SvgMonad<SvgElement> = 
+        match prim with
+        | PEllipse(props,pt,obj) -> primEllipse props pt obj

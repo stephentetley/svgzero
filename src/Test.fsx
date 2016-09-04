@@ -21,8 +21,11 @@ open System.Xml.Linq
 
 open SvgZero
 open SvgZero.Colour
+open SvgZero.Geometry
 open SvgZero.GraphicProps
 open SvgZero.SvgDoc
+open SvgZero.PictureInternal
+open SvgZero.OutputSvg
 
 let test01 = elemSvg [ elemCircle <| seq [ attrCx 30.0; attrCy 80.0; attrR 20.0; attrFill (Named "blue") ] ]
 let test02 = RGBAi(0,255,0,0).SvgValue;;
@@ -53,3 +56,14 @@ let doc2 =
 
 let testy01 = doc.ToString() 
 let testy02 = doc2.ToString() 
+
+let mdoc1 : SvgMonad<SvgElement> = 
+    let fillRed = { ShapeFill= Some(Named("red")); ShapeStroke=None }
+    let prim1 = PEllipse(fillRed, P2(0.0,0.0), { HalfWidth =5.0; HalfHeight=5.0 } )
+    primitive prim1
+
+
+let testy03 = 
+    let ma = mdoc1
+    (fun d -> d.ToString()) <| runSvg ma
+

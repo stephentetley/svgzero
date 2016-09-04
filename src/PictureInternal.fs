@@ -80,15 +80,13 @@ module PictureInternal =
       | PGroup of JoinList<Primitive>
       | PClip of PrimPath * Primitive
       | PLabel of LabelProps * PrimLabel
-      | PEllipse of ShapeProps * PrimEllipse
-      | PCircle of ShapeProps * PrimCircle
+      | PEllipse of ShapeProps * Point2 * PrimEllipse
+      | PCircle of ShapeProps * Point2 * PrimCircle
       | PRectangle of RectProps * PrimRectangle
       | PPolyline of StrokeProps * PrimPolyline
-      | PPolygon of StrokeProps * PrimPolygon
+      | PPolygon of StrokeProps *  PrimPolygon
 
-
-    type GraphicsState = 
-      { DrawColour : Colour
-        Font : FontAttr
-        Stroke : StrokeAttr
-      }
+    /// Not sure if we need this, maybe it should just be a CTM when (/ if) we add
+    /// that back
+    type GraphicsState = unit
+   
