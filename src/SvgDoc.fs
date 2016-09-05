@@ -66,6 +66,10 @@ module SvgDoc =
     
     let elemEllipse (attrs : seq<SvgAttribute>) : SvgElement = svgElem "ellipse" attrs
     
+    let elemPolyline (attrs : seq<SvgAttribute>) : SvgElement = svgElem "polyline" attrs
+
+    let elemPolygon (attrs : seq<SvgAttribute>) : SvgElement = svgElem "polygon" attrs
+
     let attrId (s : string) : SvgAttribute = new SvgAttribute(XName.Get "id", s )
     
     let attrX (d : double) = svgAttr "x" (d.ToString())
@@ -105,6 +109,11 @@ module SvgDoc =
     let pathC (p1 : Point2) (p2 : Point2) (p3 : Point2) : string = 
         sprintf "C %f %f %f %f %f %f" p1.GetX p1.GetY p2.GetX p2.GetY p3.GetX p3.GetY
     
+
+    let attrPoints (ps : Point2 list) : SvgAttribute = 
+        let point1 = function | P2(x,y) -> sprintf "%f,%f" x y
+        let body = String.concat " " <| List.map  point1 ps
+        svgAttr "points" body
     
     /// font-family="..."
     let attrFontFamily (name : string) = svgAttr "font-family" name

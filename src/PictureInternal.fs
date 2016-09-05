@@ -82,7 +82,7 @@ module PictureInternal =
       | PCircle of ShapeProps * Point2 * PrimCircle
       | PEllipse of ShapeProps * Point2 * PrimEllipse
       | PPolyline of StrokeProps * PrimPolyline
-      | PPolygon of StrokeProps *  PrimPolygon
+      | PPolygon of ShapeProps *  PrimPolygon
 
     type Picture = 
       | Leaf of JoinList<Primitive>

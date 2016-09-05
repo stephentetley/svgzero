@@ -71,7 +71,7 @@ let testy03 =
 
 let testy04 = 
     let fillRed = { ShapeFill= Some(Named("red")); ShapeStroke=None }
-    let prim1 = PEllipse(fillRed, P2(100.0, 50.0), { HalfWidth =5.0; HalfHeight=5.0 } )
+    let prim1 = PEllipse(fillRed, P2(100.0, 50.0), { HalfWidth =15.0; HalfHeight=10.0 } )
     let doc1 = svgDraw <| Leaf (fromList [prim1])
     doc1.ToString()
     

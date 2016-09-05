@@ -61,16 +61,20 @@ module OutputSvg =
         let xs = []
         attrFill props.LabelColour :: xs
 
+    let strokeProps (props : StrokeProps) : SvgAttribute list = 
+        match props with
+        | { StrokeColour =rgb; StrokeWidth = d} -> [attrStroke rgb; attrStrokeWidth d ]
+
     let shapeProps (props : ShapeProps) : SvgAttribute list = 
-        let makeStroke : StrokeProps -> SvgAttribute list = 
-            function | { StrokeColour =rgb; StrokeWidth = d} -> [attrStroke rgb; attrStrokeWidth d ]
         match props with
         | {ShapeFill = ofill; ShapeStroke = ostroke} -> 
             match ofill, ostroke with 
-            | Some(fill), Some(stroke) -> attrFill fill :: makeStroke stroke                                                                                    
+            | Some(fill), Some(stroke) -> attrFill fill :: strokeProps stroke                                                                                    
             | Some(fill), None -> [attrFill fill; attrStrokeNone ()]
-            | None, Some(stroke) -> makeStroke stroke
+            | None, Some(stroke) -> strokeProps stroke
             | None, None -> [attrStrokeNone ()]
+    
+
 
     let primLabel1 (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgElement =
         let attrs = labelProps props
@@ -96,6 +100,16 @@ module OutputSvg =
         let rs = [attrRx obj.HalfWidth; attrRy obj.HalfHeight]
         elemEllipse <| ps @ rs @ cs
 
+    let primPolyline1 (props : StrokeProps) (points : PrimPolyline) : SvgElement = 
+        let ps = strokeProps props
+        let cs = match points with | {PolylinePoints = xs} -> [attrPoints xs]
+        elemPolyline <| ps @ cs
+
+    let primPolygon1 (props : ShapeProps) (points : PrimPolygon) : SvgElement = 
+        let ps = shapeProps props
+        let cs = match points with | {PolygonPoints = xs} -> [attrPoints xs]
+        elemPolygon <| ps @ cs
+
 
     /// Potentially we may have to change center point due to CTM...
     let primLabel (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgMonad<SvgElement> = 
@@ -110,6 +124,12 @@ module OutputSvg =
     let primEllipse (props : ShapeProps) (pt : Point2) (obj : PrimEllipse) : SvgMonad<SvgElement> = 
         svgoutput.Return <| primEllipse1 props pt obj 
 
+    let primPolyline (props : StrokeProps) (ps : PrimPolyline) : SvgMonad<SvgElement> = 
+        svgoutput.Return <| primPolyline1 props ps
+
+    let primPolygon (props : ShapeProps) (ps : PrimPolygon) : SvgMonad<SvgElement> = 
+        svgoutput.Return <| primPolygon1 props ps
+
     let rec primitive (prim : Primitive) : SvgMonad<SvgElement> = 
         match prim with
         | PGroup(objs) -> group objs
@@ -117,6 +137,8 @@ module OutputSvg =
         | PRectangle(props,pt,obj) -> primRect props pt obj
         | PCircle(props,pt,obj) -> primCircle props pt obj
         | PEllipse(props,pt,obj) -> primEllipse props pt obj
+        | PPolyline(props,obj) -> primPolyline props obj
+        | PPolygon(props,obj) -> primPolygon props obj
 
     and group (objs : JoinList<Primitive>) : SvgMonad<SvgElement> = 
         svgoutput { let! body = mapM primitive (toList objs)
