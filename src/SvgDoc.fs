@@ -92,7 +92,8 @@ module SvgDoc =
     let attrCx (d : double) : SvgAttribute = svgAttr "cx" (d.ToString())
     let attrCy (d : double) : SvgAttribute = svgAttr "cy" (d.ToString())
 
-    
+    /// path data already rendered to a string...
+    let attrD (ss : string) : SvgAttribute = svgAttr "d" ss
     
     /// Path Segments, encoded as string values.
     
@@ -102,13 +103,26 @@ module SvgDoc =
     
     /// L ... ...
     /// c.f. PostScript's @lineto@.
-    let pathL (p1 :Point2) : string = sprintf "L %f %f" p1.GetX p1.GetY
+    let pathL (p1 : Point2) : string = sprintf "L %f %f" p1.GetX p1.GetY
     
     /// C ... ... ... ... ... ... 
     /// c.f. PostScript's @curveto@.
     let pathC (p1 : Point2) (p2 : Point2) (p3 : Point2) : string = 
         sprintf "C %f %f %f %f %f %f" p1.GetX p1.GetY p2.GetX p2.GetY p3.GetX p3.GetY
     
+    /// m ... ...
+    /// c.f. PostScript's @moveto@.
+    let pathRelM (v1 : Vector2) : string = sprintf "m %f %f" v1.GetX v1.GetY
+    
+    /// l ... ...
+    /// c.f. PostScript's @lineto@.
+    let pathRelL (v1 : Vector2) : string = sprintf "l %f %f" v1.GetX v1.GetY
+    
+    /// c ... ... ... ... ... ... 
+    /// c.f. PostScript's @curveto@.
+    let pathRelC (v1 : Vector2) (v2 : Vector2) (v3 : Vector2) : string = 
+        sprintf "C %f %f %f %f %f %f" v1.GetX v1.GetY v2.GetX v2.GetY v3.GetX v3.GetY
+
 
     let attrPoints (ps : Point2 list) : SvgAttribute = 
         let point1 = function | P2(x,y) -> sprintf "%f,%f" x y

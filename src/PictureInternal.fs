@@ -47,11 +47,14 @@ module PictureInternal =
 
     /// Paths - SVG supports both absolute and relative paths - should we support both?
     /// Probably - then a user can choose which makes sense for their application.
-    
+    /// MoveTo indicates "pen up"
+
     type RelPathSegment = 
       | RelCurveTo of Vector2 * Vector2 * Vector2
       | RelLineTo of Vector2
-      
+      | RelMoveTo of Vector2
+
+
     type PrimRelPath = 
       { RelPathStart : Point2 
         RelPathSegments : RelPathSegment list
@@ -60,14 +63,16 @@ module PictureInternal =
     type AbsPathSegment = 
       | AbsCurveTo of Point2 * Point2 * Point2
       | AbsLineTo of Point2
-      
+      | AbsMoveTo of Point2
+
     type PrimAbsPath = 
-      { AbsPathSegments : AbsPathSegment list
+      { AbsPathStart : Point2 
+        AbsPathSegments : AbsPathSegment list
       }
       
     type PrimPath =
-       | AbsolutePath of PrimAbsPath
-       | RelativePath of PrimRelPath
+      | AbsolutePath of PrimAbsPath
+      | RelativePath of PrimRelPath
 
     type PrimPolyline = { PolylinePoints : Point2 list }
     

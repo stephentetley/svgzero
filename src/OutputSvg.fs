@@ -74,7 +74,37 @@ module OutputSvg =
             | None, Some(stroke) -> strokeProps stroke
             | None, None -> [attrStrokeNone ()]
     
+    let absPathSegment1 (obj : AbsPathSegment) : string = 
+        match obj with
+        | AbsCurveTo(p1,p2,p3) -> pathC p1 p2 p3
+        | AbsLineTo(p1) -> pathL p1
+        | AbsMoveTo(p1) -> pathM p1
+    
+    let relPathSegment1 (obj : RelPathSegment) : string = 
+        match obj with
+        | RelCurveTo(v1,v2,v3) -> pathRelC v1 v2 v3
+        | RelLineTo(v1) -> pathRelL v1
+        | RelMoveTo(v1) -> pathRelM v1
 
+    
+    let absPath (obj : PrimAbsPath) : string = 
+        match obj with
+        | {AbsPathStart = start; AbsPathSegments = segs} ->  
+            let start1 = pathM start
+            let parts = List.map absPathSegment1 segs
+            String.concat " " <| start1 :: parts
+
+    let relPath (obj : PrimRelPath) : string = 
+        match obj with
+        | {RelPathStart = start; RelPathSegments = segs} ->  
+            let start1 = pathM start
+            let parts = List.map relPathSegment1 segs
+            String.concat " " <| start1 :: parts
+
+    let primPath (obj : PrimPath) : SvgAttribute =  
+        match obj with
+        | AbsolutePath(path) -> attrD <| absPath path
+        | RelativePath(path) -> attrD <| relPath path
 
     let primLabel1 (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgElement =
         let attrs = labelProps props
