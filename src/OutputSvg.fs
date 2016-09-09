@@ -101,10 +101,10 @@ module OutputSvg =
             let parts = List.map relPathSegment1 segs
             String.concat " " <| start1 :: parts
 
-    let primPath (obj : PrimPath) : SvgAttribute =  
+    let primPath (obj : PrimPath) : string =  
         match obj with
-        | AbsolutePath(path) -> attrD <| absPath path
-        | RelativePath(path) -> attrD <| relPath path
+        | AbsolutePath(path) -> absPath path
+        | RelativePath(path) -> relPath path
 
     let primLabel1 (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgElement =
         let attrs = labelProps props
@@ -141,7 +141,9 @@ module OutputSvg =
         elemPolygon <| ps @ cs
 
 
+       
     /// Potentially we may have to change center point due to CTM...
+   
     let primLabel (props : LabelProps) (pt : Point2) (obj : PrimLabel) : SvgMonad<SvgElement> = 
         svgoutput.Return <| primLabel1 props pt obj 
 
@@ -160,9 +162,15 @@ module OutputSvg =
     let primPolygon (props : ShapeProps) (ps : PrimPolygon) : SvgMonad<SvgElement> = 
         svgoutput.Return <| primPolygon1 props ps
 
+    let primClipPath (id : SvgID) (path : PrimPath) : SvgMonad<SvgElement> = 
+        let a1 = attrId <| getSvgID id
+        let ds = primPath path
+        svgoutput.Return <| elemClipPath [a1] [elemPathNoAttrs ds]
+
     let rec primitive (prim : Primitive) : SvgMonad<SvgElement> = 
         match prim with
         | PGroup(objs) -> group objs
+        | PClip(id,path,obj) -> failwith "todo"
         | PLabel(props,pt,obj) -> primLabel props pt obj
         | PRectangle(props,pt,obj) -> primRect props pt obj
         | PCircle(props,pt,obj) -> primCircle props pt obj
@@ -174,6 +182,14 @@ module OutputSvg =
         svgoutput { let! body = mapM primitive (toList objs)
                     return (elemGNoAttrs body)
                   }
+
+    and clip (id : SvgID) (path : PrimPath) (obj : Primitive) : SvgMonad<SvgElement> = 
+        svgoutput { let! clippath = primClipPath id path
+                    let! body1 = primitive obj 
+                    let body = elemG1 [attrClipPath <| getSvgID id] body1
+                    return (elemGNoAttrs [ clippath; body ])
+                  }
+
 
     let rec picture (obj : Picture) : SvgMonad<SvgElement> =
         match obj with

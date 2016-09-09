@@ -10,6 +10,8 @@ open SvgZero.TransformInternal
 module PictureInternal = 
     
     type SvgID = SvgID of string
+
+    let getSvgID : SvgID -> string = function | SvgID(ss) -> ss
     
     /// TODO - for simplicity, initially we should avoid adding a CTM to each primitive.
     /// We have already shown how to work with elements attributed with a CTM in Wumpus, we can crib
@@ -81,7 +83,7 @@ module PictureInternal =
     /// More to add (see Wumpus) ...
     type Primitive = 
       | PGroup of JoinList<Primitive>
-      | PClip of PrimPath * Primitive
+      | PClip of SvgID * PrimPath * Primitive
       | PLabel of LabelProps * Point2 * PrimLabel
       | PRectangle of RectProps * Point2 * PrimRectangle
       | PCircle of ShapeProps * Point2 * PrimCircle
@@ -89,6 +91,7 @@ module PictureInternal =
       | PPolyline of StrokeProps * PrimPolyline
       | PPolygon of ShapeProps *  PrimPolygon
 
+    /// Note - the tree shape is more-or-less redundant if we have @group as a Primitive
     type Picture = 
       | Leaf of JoinList<Primitive>
       | Picture of JoinList<Picture>
